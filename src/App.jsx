@@ -1,14 +1,59 @@
 import axios from 'axios'
 import { useState } from 'react'
 
+const getToken = async () => {
+
+    const url = 'https://api.digikey.com/v1/oauth2/token';
+
+    const headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    };
+
+    const data = {
+        grant_type: 'client_credentials',
+        client_id: 'UrAYDvwyCyUpEvkBG2FrO1V1lXDAmfIK',
+        client_secret: '8yAhIu8V59LLUoSt'
+    };
+
+    const res = await axios.post(url, new URLSearchParams(data), { headers })
+    if (res.status === 200) return res.data.access_token
+}
+
+const getProduct = async (productNumber, token) => {
+
+    try {
+        console.log(productNumber)
+        const response = await axios.get(`https://api.digikey.com/products/v4/search/${productNumber}/productdetails`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                "X-DIGIKEY-Client-Id": "UrAYDvwyCyUpEvkBG2FrO1V1lXDAmfIK",
+            }
+        })
+        if (response.status !== 200) throw new Error("ERROR")
+        else return response
+    } catch (error) {
+        return error;
+    }
+
+}
+
 function App() {
 
-    const [productData, setProductData] = useState(null)
+    const [productData, setProductData] = useState()
     const [productNumber, setProductNumber] = useState("")
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        setProductData({ "submit": "success" })
+        console.log(productNumber)
+        const token = await getToken()
+        console.log(token)
+        if (token) {
+            const response = await getProduct(productNumber, token)
+            console.log(response)
+            if (response.status === 200) setProductData(response.data)
+            else setProductData("ERROR")
+        }
     }
 
     return (
