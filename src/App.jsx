@@ -5,7 +5,7 @@ import ProductsTable from './components/ProductsTable.jsx';
 
 const getToken = async () => {
 
-    const url = 'https://api.digikey.com/v1/oauth2/token';
+    const url = 'https://sandbox-api.digikey.com/v1/oauth2/token';
 
     const headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -13,8 +13,8 @@ const getToken = async () => {
 
     const data = {
         grant_type: 'client_credentials',
-        client_id: 'UrAYDvwyCyUpEvkBG2FrO1V1lXDAmfIK',
-        client_secret: '8yAhIu8V59LLUoSt'
+        client_id: 'YeCH2Ze1I0NAK5SEMO6BfimvrJ9CAR0X',
+        client_secret: 'jyAXzPGGGpb4HGBM'
     };
 
     const res = await axios.post(url, new URLSearchParams(data), { headers })
@@ -25,57 +25,108 @@ const getProduct = async (productNumber, token) => {
 
     try {
         console.log(productNumber)
-        const response = await axios.get(`https://api.digikey.com/products/v4/search/${productNumber}/productdetails`, {
+        const response = await axios.get(`https://sandbox-api.digikey.com/products/v4/search/${productNumber}/productdetails`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
-                "X-DIGIKEY-Client-Id": "UrAYDvwyCyUpEvkBG2FrO1V1lXDAmfIK",
+                "X-DIGIKEY-Client-Id": "YeCH2Ze1I0NAK5SEMO6BfimvrJ9CAR0X",
             }
         })
-        if (response.status !== 200) throw new Error("ERROR")
-        else return response
+        return response.data.Product
     } catch (error) {
-        return error
+        console.error('Axios Error:', error);
+        return { error: error }; // Mark product with error
     }
 
 }
 
 function App() {
 
-    const [productNumbers, setProductNumbers] = useState([])
     const [tableData, setTableData] = useState([])
     const [digiKeyPNs, setDigiKeyPNs] = useState([]);
 
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault()
-    //     console.log(productNumber)
-    //     const token = await getToken()
-    //     console.log(token)
-    //     if (token) {
-    //         const response = await getProduct(productNumber, token)
-    //         console.log(response)
-    //         if (response.status === 200) setProductData(response.data.Product)
-    //         else setProductData("ERROR")
-    //     }
-    // }
+    const fetchProducts = async (token, batch) => {
+        console.log('Fetching products for batch:', batch);
+        const promises = batch.map(pn => getProduct(pn, token));
+        try {
+            const products = await Promise.all(promises);
+            console.log('Products fetched:', products);
+            // Filter out products with errors
+            const filteredProducts = products.filter(product => !product.error);
+            setTableData(prev => [...prev, ...filteredProducts]);
+        } catch (error) {
+            console.error('Error fetching products:', error);
+            // Retry with exponential backoff if error is 429 (Too Many Requests)
+            if (error.response && error.response.status === 429) {
+                console.log('Rate limited, retrying with exponential backoff...');
+                await retryWithExponentialBackoff(() => fetchProducts(token, batch));
+            }
+        }
+    }
 
-    const parseFile = (file) => {
+    useEffect(() => {
+        console.log('Table data updated:', tableData);
+    }, [tableData])
+
+    const retryWithExponentialBackoff = async (func, maxRetries = 5, baseDelay = 1000) => {
+        let retries = 0;
+        let delay = baseDelay;
+        while (retries < maxRetries) {
+            try {
+                return await func();
+            } catch (error) {
+                console.error('Error:', error);
+                if (error.response && error.response.status === 429) {
+                    retries++;
+                    console.log(`Retry attempt ${retries} after ${delay}ms delay`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay *= 2; // Exponential backoff
+                } else {
+                    throw error;
+                }
+            }
+        }
+        throw new Error('Max retries exceeded');
+    };
+
+    const parseFile = async (file) => {
         Papa.parse(file, {
             header: true,
             complete: function (results) {
-                console.log('Parsed CSV:', results.data);
-
-                const digiKeyPNs = results.data.map(row => row['DIGIKEY PN']).filter(pn => pn);
-                console.log('Digi-Key PNs:', digiKeyPNs);
-                setDigiKeyPNs(digiKeyPNs);
+                console.log('Parsed CSV:', results.data)
+                const digiKeyPNs = results.data.map(row => row['DIGIKEY PN']).filter(pn => pn)
+                console.log('Digi-Key PNs:', digiKeyPNs)
+                setDigiKeyPNs(digiKeyPNs)
             }
-        });
+        })
+
     }
 
     const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        parseFile(file);
+        const file = event.target.files[0]
+        parseFile(file)
     };
+
+    useEffect(() => {
+        const getTokenAndFetchProducts = async () => {
+            const token = await getToken();
+            if (token && digiKeyPNs.length > 0) {
+                // Define batch size (e.g., 10)
+                const batchSize = 10;
+                // Split digiKeyPNs into batches
+                const batches = [];
+                for (let i = 0; i < digiKeyPNs.length; i += batchSize) {
+                    batches.push(digiKeyPNs.slice(i, i + batchSize));
+                }
+                // Fetch products for each batch with rate limiting
+                for (const batch of batches) {
+                    await fetchProducts(token, batch);
+                }
+            }
+        };
+
+        getTokenAndFetchProducts();
+    }, [digiKeyPNs]);
 
     return (
         <div className="bg-gray-200 h-screen flex items-center justify-center">
@@ -108,7 +159,7 @@ function App() {
                 />
             </div>
 
-            <ProductsTable tableData />
+            <ProductsTable tableData={tableData} />
 
         </div>
     )

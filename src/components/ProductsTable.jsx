@@ -1,6 +1,11 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 export default function ProductsTable(tableData) {
+
+    useEffect(() => {
+        console.log(tableData)
+    }, [])
+
     return (
         <div className="overflow-x-auto">
             <table className="table-auto w-full border-collapse border border-gray-400">
@@ -19,43 +24,20 @@ export default function ProductsTable(tableData) {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td className="px-4 py-2 border border-gray-400">ABC123</td>
-                        <td className="px-4 py-2 border border-gray-400">10</td>
-                        <td className="px-4 py-2 border border-gray-400">$10.00</td>
-                        <td className="px-4 py-2 border border-gray-400">Product ABC</td>
-                        <td className="px-4 py-2 border border-gray-400">Detailed description of product ABC</td>
-                        <td className="px-4 py-2 border border-gray-400">0°C to 50°C</td>
-                        <td className="px-4 py-2 border border-gray-400">10mm x 10mm</td>
-                        <td className="px-4 py-2 border border-gray-400">SMD</td>
-                        <td className="px-4 py-2 border border-gray-400">5V</td>
-                        <td className="px-4 py-2 border border-gray-400">±0.1%</td>
-                    </tr>
-                    <tr>
-                        <td className="px-4 py-2 border border-gray-400">ABC123</td>
-                        <td className="px-4 py-2 border border-gray-400">10</td>
-                        <td className="px-4 py-2 border border-gray-400">$10.00</td>
-                        <td className="px-4 py-2 border border-gray-400">Product ABC</td>
-                        <td className="px-4 py-2 border border-gray-400">Detailed description of product ABC</td>
-                        <td className="px-4 py-2 border border-gray-400">0°C to 50°C</td>
-                        <td className="px-4 py-2 border border-gray-400">10mm x 10mm</td>
-                        <td className="px-4 py-2 border border-gray-400">SMD</td>
-                        <td className="px-4 py-2 border border-gray-400">5V</td>
-                        <td className="px-4 py-2 border border-gray-400">±0.1%</td>
-                    </tr>
-                    <tr>
-                        <td className="px-4 py-2 border border-gray-400">ABC123</td>
-                        <td className="px-4 py-2 border border-gray-400">10</td>
-                        <td className="px-4 py-2 border border-gray-400">$10.00</td>
-                        <td className="px-4 py-2 border border-gray-400">Product ABC</td>
-                        <td className="px-4 py-2 border border-gray-400">Detailed description of product ABC</td>
-                        <td className="px-4 py-2 border border-gray-400">0°C to 50°C</td>
-                        <td className="px-4 py-2 border border-gray-400">10mm x 10mm</td>
-                        <td className="px-4 py-2 border border-gray-400">SMD</td>
-                        <td className="px-4 py-2 border border-gray-400">5V</td>
-                        <td className="px-4 py-2 border border-gray-400">±0.1%</td>
-                    </tr>
-                    {/* Add more rows as needed */}
+                    {tableData.length > 0 && tableData.map((product, index) => (
+                        <tr key={index}>
+                            <td className="px-4 py-2 border border-gray-400">{product.manufacturerPN}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.quantityAvailable}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.unitPrice}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.productDescription}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.detailedDescription}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.operatingTemperature}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.sizeDimension}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.packageCase}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.voltageRated}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.tolerance}</td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </div>
