@@ -42,36 +42,40 @@ const getProduct = async (productNumber, token) => {
 
 function App() {
 
-    const [productData, setProductData] = useState()
-    const [productNumber, setProductNumber] = useState("")
+    const [productNumbers, setProductNumbers] = useState([])
     const [tableData, setTableData] = useState([])
-    const [csvData, setCsvData] = useState([])
+    const [digiKeyPNs, setDigiKeyPNs] = useState([]);
 
-    useEffect(() => {
-        Papa.parse('DSP_2V3_DNP.csv', {
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault()
+    //     console.log(productNumber)
+    //     const token = await getToken()
+    //     console.log(token)
+    //     if (token) {
+    //         const response = await getProduct(productNumber, token)
+    //         console.log(response)
+    //         if (response.status === 200) setProductData(response.data.Product)
+    //         else setProductData("ERROR")
+    //     }
+    // }
+
+    const parseFile = (file) => {
+        Papa.parse(file, {
             header: true,
             complete: function (results) {
                 console.log('Parsed CSV:', results.data);
-                // Extract MANUFACTURER PN column from each line
-                const manufacturerPNs = results.data.map(row => row['DIGIKEY PN']);
-                console.log('DIGIKEY PNs:', manufacturerPNs);
-                setCsvData(manufacturerPNs);
+
+                const digiKeyPNs = results.data.map(row => row['DIGIKEY PN']).filter(pn => pn);
+                console.log('Digi-Key PNs:', digiKeyPNs);
+                setDigiKeyPNs(digiKeyPNs);
             }
         });
-    }, [])
-
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        console.log(productNumber)
-        const token = await getToken()
-        console.log(token)
-        if (token) {
-            const response = await getProduct(productNumber, token)
-            console.log(response)
-            if (response.status === 200) setProductData(response.data.Product)
-            else setProductData("ERROR")
-        }
     }
+
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        parseFile(file);
+    };
 
     return (
         <div className="bg-gray-200 h-screen flex items-center justify-center">
@@ -90,6 +94,19 @@ function App() {
                     </div>
                 </div>
             </div> */}
+
+            <div className="flex items-center justify-center w-full">
+                <label htmlFor="fileInput" className="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg">
+                    Upload CSV File
+                </label>
+                <input
+                    id="fileInput"
+                    type="file"
+                    className="hidden"
+                    accept=".csv"
+                    onChange={handleFileChange}
+                />
+            </div>
 
             <ProductsTable tableData />
 
