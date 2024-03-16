@@ -6,7 +6,7 @@ export default function ProductsTable(props) {
 
     const findValueTextByParameterText = (parameters, parameterText) => {
         const parameter = parameters.find(param => param.ParameterText === parameterText);
-        return parameter ? parameter.ValueText : ''; // Return ValueText if parameter is found, otherwise empty string
+        return parameter ? parameter.ValueText : '-'; // Return ValueText if parameter is found, otherwise empty string
     };
 
     const checkTemperature = (temp) => {
@@ -24,6 +24,7 @@ export default function ProductsTable(props) {
             else return true;
 
         }
+        else return true;
     }
 
     return (

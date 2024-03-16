@@ -113,16 +113,18 @@ function App() {
         parseFile(file)
     };
 
+    // REQUEST CONTROL PART
     useEffect(() => {
         const getTokenAndFetchProducts = async () => {
             const token = await getToken();
             if (token && digiKeyPNs.length > 0) {
                 // Define batch size (e.g., 10)
-                const batchSize = 2;
+                const batchSize = 20;
                 // Split digiKeyPNs into batches
                 const batches = [];
-                for (let i = 0; i < digiKeyPNs.length / 10; i += batchSize) {
+                for (let i = 0; i < digiKeyPNs.length; i += batchSize) {
                     batches.push(digiKeyPNs.slice(i, i + batchSize));
+                    break
                 }
                 // Fetch products for each batch with rate limiting
                 for (const batch of batches) {
