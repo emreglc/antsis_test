@@ -5,7 +5,7 @@ import ProductsTable from './components/ProductsTable.jsx';
 
 const getToken = async () => {
 
-    const url = 'https://sandbox-api.digikey.com/v1/oauth2/token';
+    const url = 'https://api.digikey.com/v1/oauth2/token';
 
     const headers = {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -13,8 +13,8 @@ const getToken = async () => {
 
     const data = {
         grant_type: 'client_credentials',
-        client_id: 'YeCH2Ze1I0NAK5SEMO6BfimvrJ9CAR0X',
-        client_secret: 'jyAXzPGGGpb4HGBM'
+        client_id: 'UrAYDvwyCyUpEvkBG2FrO1V1lXDAmfIK',
+        client_secret: '8yAhIu8V59LLUoSt'
     };
 
     const res = await axios.post(url, new URLSearchParams(data), { headers })
@@ -25,11 +25,11 @@ const getProduct = async (productNumber, token) => {
 
     try {
         console.log(productNumber)
-        const response = await axios.get(`https://sandbox-api.digikey.com/products/v4/search/${productNumber}/productdetails`, {
+        const response = await axios.get(`https://api.digikey.com/products/v4/search/${productNumber}/productdetails`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json',
-                "X-DIGIKEY-Client-Id": "YeCH2Ze1I0NAK5SEMO6BfimvrJ9CAR0X",
+                "X-DIGIKEY-Client-Id": "UrAYDvwyCyUpEvkBG2FrO1V1lXDAmfIK",
             }
         })
         return response.data.Product
@@ -94,7 +94,13 @@ function App() {
             header: true,
             complete: function (results) {
                 console.log('Parsed CSV:', results.data)
-                const digiKeyPNs = results.data.map(row => row['DIGIKEY PN']).filter(pn => pn)
+                const digiKeyPNs = results.data.map(row => {
+                    var pn = row['DIGIKEY PN']
+                    if (pn) {
+                        pn = pn.replace(/\(ANTSIS_STOK\)|\(STOK\)|\(stok\)/g, "");
+                    }
+                    return pn;
+                }).filter(pn => pn)
                 console.log('Digi-Key PNs:', digiKeyPNs)
                 setDigiKeyPNs(digiKeyPNs)
             }
@@ -112,10 +118,10 @@ function App() {
             const token = await getToken();
             if (token && digiKeyPNs.length > 0) {
                 // Define batch size (e.g., 10)
-                const batchSize = 10;
+                const batchSize = 2;
                 // Split digiKeyPNs into batches
                 const batches = [];
-                for (let i = 0; i < digiKeyPNs.length; i += batchSize) {
+                for (let i = 0; i < digiKeyPNs.length / 10; i += batchSize) {
                     batches.push(digiKeyPNs.slice(i, i + batchSize));
                 }
                 // Fetch products for each batch with rate limiting
@@ -129,7 +135,7 @@ function App() {
     }, [digiKeyPNs]);
 
     return (
-        <div className="bg-gray-200 h-screen flex items-center justify-center">
+        <div className="bg-gray-200 h-screen flex items-center flex-col pt-10">
             {/* <div className="bg-white p-8 rounded-md shadow-md w-[50vw]">
                 
                 <form className="mb-4" onSubmit={handleSubmit}>
@@ -146,7 +152,7 @@ function App() {
                 </div>
             </div> */}
 
-            <div className="flex items-center justify-center w-full">
+            <div className="flex items-center justify-center w-full mb-10">
                 <label htmlFor="fileInput" className="cursor-pointer bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg">
                     Upload CSV File
                 </label>

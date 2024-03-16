@@ -1,10 +1,8 @@
 import React, { useEffect } from 'react'
 
-export default function ProductsTable(tableData) {
+export default function ProductsTable(props) {
 
-    useEffect(() => {
-        console.log(tableData)
-    }, [])
+    const { tableData } = props
 
     return (
         <div className="overflow-x-auto">
@@ -26,16 +24,16 @@ export default function ProductsTable(tableData) {
                 <tbody>
                     {tableData.length > 0 && tableData.map((product, index) => (
                         <tr key={index}>
-                            <td className="px-4 py-2 border border-gray-400">{product.manufacturerPN}</td>
-                            <td className="px-4 py-2 border border-gray-400">{product.quantityAvailable}</td>
-                            <td className="px-4 py-2 border border-gray-400">{product.unitPrice}</td>
-                            <td className="px-4 py-2 border border-gray-400">{product.productDescription}</td>
-                            <td className="px-4 py-2 border border-gray-400">{product.detailedDescription}</td>
-                            <td className="px-4 py-2 border border-gray-400">{product.operatingTemperature}</td>
-                            <td className="px-4 py-2 border border-gray-400">{product.sizeDimension}</td>
-                            <td className="px-4 py-2 border border-gray-400">{product.packageCase}</td>
-                            <td className="px-4 py-2 border border-gray-400">{product.voltageRated}</td>
-                            <td className="px-4 py-2 border border-gray-400">{product.tolerance}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.ManufacturerProductNumber}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.QuantityAvailable}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.UnitPrice}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.Description.ProductDescription}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.Description.DetailedDescription}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.Parameters[4].ValueText}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.Parameters[11].ValueText}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.Parameters[10].ValueText}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.Parameters[2].ValueText}</td>
+                            <td className="px-4 py-2 border border-gray-400">{product.Parameters[1].ValueText}</td>
                         </tr>
                     ))}
                 </tbody>
