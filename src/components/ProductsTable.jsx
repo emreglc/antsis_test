@@ -9,6 +9,23 @@ export default function ProductsTable(props) {
         return parameter ? parameter.ValueText : ''; // Return ValueText if parameter is found, otherwise empty string
     };
 
+    const checkTemperature = (temp) => {
+        const regex = /(-?\d+(?:\.\d+)?)°C/g;
+
+        const matches = temp.match(regex);
+
+        if (matches && matches.length >= 2) {
+            const minVal = parseFloat(matches[0]);
+            const maxVal = parseFloat(matches[1]);
+
+            if (minVal > -40 || maxVal < 85) {
+                return false;
+            }
+            else return true;
+
+        }
+    }
+
     return (
         <div className="overflow-x-auto">
             <table className="table-auto w-full border-collapse border border-gray-400">
@@ -28,7 +45,7 @@ export default function ProductsTable(props) {
                 </thead>
                 <tbody>
                     {tableData.length > 0 && tableData.map((product, index) => (
-                        <tr key={index} className={product.QuantityAvailable < 100000 ? "text-red-600" : ""}>
+                        <tr key={index} className={!checkTemperature(findValueTextByParameterText(product.Parameters, "Operating Temperature")) ? "text-red-600" : ""}>
                             <td className="px-4 py-2 border border-gray-400">{product.ManufacturerProductNumber}</td>
                             <td className="px-4 py-2 border border-gray-400">{product.QuantityAvailable}</td>
                             <td className="px-4 py-2 border border-gray-400">{product.UnitPrice}</td>
