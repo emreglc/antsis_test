@@ -4,6 +4,11 @@ export default function ProductsTable(props) {
 
     const { tableData } = props
 
+    const findValueTextByParameterText = (parameters, parameterText) => {
+        const parameter = parameters.find(param => param.ParameterText === parameterText);
+        return parameter ? parameter.ValueText : ''; // Return ValueText if parameter is found, otherwise empty string
+    };
+
     return (
         <div className="overflow-x-auto">
             <table className="table-auto w-full border-collapse border border-gray-400">
@@ -23,17 +28,17 @@ export default function ProductsTable(props) {
                 </thead>
                 <tbody>
                     {tableData.length > 0 && tableData.map((product, index) => (
-                        <tr key={index}>
+                        <tr key={index} className={product.QuantityAvailable < 100000 ? "text-red-600" : ""}>
                             <td className="px-4 py-2 border border-gray-400">{product.ManufacturerProductNumber}</td>
                             <td className="px-4 py-2 border border-gray-400">{product.QuantityAvailable}</td>
                             <td className="px-4 py-2 border border-gray-400">{product.UnitPrice}</td>
                             <td className="px-4 py-2 border border-gray-400">{product.Description.ProductDescription}</td>
                             <td className="px-4 py-2 border border-gray-400">{product.Description.DetailedDescription}</td>
-                            <td className="px-4 py-2 border border-gray-400">{product.Parameters[4].ValueText}</td>
-                            <td className="px-4 py-2 border border-gray-400">{product.Parameters[11].ValueText}</td>
-                            <td className="px-4 py-2 border border-gray-400">{product.Parameters[10].ValueText}</td>
-                            <td className="px-4 py-2 border border-gray-400">{product.Parameters[2].ValueText}</td>
-                            <td className="px-4 py-2 border border-gray-400">{product.Parameters[1].ValueText}</td>
+                            <td className="px-4 py-2 border border-gray-400">{findValueTextByParameterText(product.Parameters, "Operating Temperature")}</td>
+                            <td className="px-4 py-2 border border-gray-400">{findValueTextByParameterText(product.Parameters, "Size / Dimension")}</td>
+                            <td className="px-4 py-2 border border-gray-400">{findValueTextByParameterText(product.Parameters, "Package / Case")}</td>
+                            <td className="px-4 py-2 border border-gray-400">{findValueTextByParameterText(product.Parameters, "Voltage - Rated")}</td>
+                            <td className="px-4 py-2 border border-gray-400">{findValueTextByParameterText(product.Parameters, "Tolerance")}</td>
                         </tr>
                     ))}
                 </tbody>
